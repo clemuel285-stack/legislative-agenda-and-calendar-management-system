@@ -246,3 +246,139 @@ function vendorAsset(
         ? appUrl('assets/vendor/' . $relativePath)
         : $fallbackUrl;
 }
+
+
+function clean(mixed $value): string
+{
+    return trim((string)$value);
+}
+
+function csrfField(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' .
+        e(csrfToken()) . '">';
+}
+
+function isAjaxRequest(): bool
+{
+    return strtolower((string)($_SERVER['HTTP_X_REQUESTED_WITH'] ?? ''))
+        === 'xmlhttprequest';
+}
+
+function jsonResponse(
+    bool $success,
+    string $message='',
+    array $data=[],
+    int $status=200
+): never {
+    http_response_code($status);
+    header('Content-Type: application/json; charset=UTF-8');
+
+    echo json_encode(
+        array_merge(
+            ['success'=>$success,'message'=>$message],
+            $data
+        ),
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+    exit;
+}
+
+function requireCsrf(): void
+{
+    if(verifyCsrfToken($_POST['csrf_token'] ?? null))return;
+
+    if(isAjaxRequest()){
+        jsonResponse(false,'Your form session expired. Refresh the page and try again.',[],419);
+    }
+
+    http_response_code(419);
+    exit('Invalid or expired CSRF token.');
+}
+
+function formatTime(?string $value): string
+{
+    if(!$value)return '—';
+    $timestamp=strtotime($value);
+    return $timestamp===false?(string)$value:date('h:i A',$timestamp);
+}
+
+function paginate(int $total,int $page,int $perPage=DEFAULT_PAGE_SIZE): array
+{
+    $perPage=max(1,$perPage);
+    $pages=max(1,(int)ceil($total/$perPage));
+    $page=max(1,min($page,$pages));
+
+    return [
+        'page'=>$page,
+        'perPage'=>$perPage,
+        'total'=>$total,
+        'pages'=>$pages,
+        'offset'=>($page-1)*$perPage,
+    ];
+}
+
+function renderPagination(array $info,string $baseUrl,array $query=[]): string
+{
+    $pages=(int)($info['pages']??1);
+    $page=(int)($info['page']??1);
+    if($pages<=1)return '';
+
+    $html='<nav><ul class="pagination pagination-sm mb-0">';
+
+    for($i=1;$i<=$pages;$i++){
+        $q=$query;
+        $q['page']=$i;
+        $url=$baseUrl.(str_contains($baseUrl,'?')?'&':'?').http_build_query($q);
+        $html.='<li class="page-item '.($i===$page?'active':'').'">' .
+            '<a class="page-link" href="'.e($url).'">'.$i.'</a></li>';
+    }
+
+    return $html.'</ul></nav>';
+}
+
+function handleUpload(array $file,string $subDirectory='lacms'): array
+{
+    $error=(int)($file['error']??UPLOAD_ERR_NO_FILE);
+
+    if($error!==UPLOAD_ERR_OK){
+        return ['success'=>false,'message'=>'The selected file could not be uploaded.'];
+    }
+
+    $size=(int)($file['size']??0);
+    if($size<=0 || $size>MAX_UPLOAD_SIZE){
+        return ['success'=>false,'message'=>'File exceeds the allowed upload size.'];
+    }
+
+    $original=(string)($file['name']??'document');
+    $extension=strtolower(pathinfo($original,PATHINFO_EXTENSION));
+
+    if(!in_array($extension,ALLOWED_UPLOAD_EXT,true)){
+        return ['success'=>false,'message'=>'This file type is not allowed.'];
+    }
+
+    $safeBase=preg_replace('/[^A-Za-z0-9._-]/','_',pathinfo($original,PATHINFO_FILENAME));
+    $safeBase=trim((string)$safeBase,'._-') ?: 'document';
+    $stored=$safeBase.'_'.bin2hex(random_bytes(8)).'.'.$extension;
+
+    $folder=trim($subDirectory,'/').'/'.date('Y/m');
+    $targetDir=rtrim(UPLOAD_DIR,'/\\').DIRECTORY_SEPARATOR.str_replace('/',DIRECTORY_SEPARATOR,$folder);
+
+    if(!is_dir($targetDir) && !mkdir($targetDir,0775,true) && !is_dir($targetDir)){
+        return ['success'=>false,'message'=>'Unable to create the upload folder.'];
+    }
+
+    $target=$targetDir.DIRECTORY_SEPARATOR.$stored;
+
+    if(!move_uploaded_file((string)$file['tmp_name'],$target)){
+        return ['success'=>false,'message'=>'Unable to save the uploaded file.'];
+    }
+
+    return [
+        'success'=>true,
+        'file_name'=>$original,
+        'stored_name'=>$stored,
+        'file_path'=>$folder.'/'.$stored,
+        'size'=>$size,
+    ];
+}

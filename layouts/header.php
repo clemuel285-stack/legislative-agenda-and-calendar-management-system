@@ -58,7 +58,7 @@ $subsystems = [
             <i class="bi bi-search"></i>
         </a>
 
-        <a href="<?= e(appUrl('pages/ai_email_reminders.php')) ?>" class="lacms-topbar-icon planned" title="AI-Based Email Reminders">
+        <a href="<?= e(appUrl('pages/ai_email_reminders.php')) ?>" class="lacms-topbar-icon" title="AI-Assisted Email Reminders">
             <i class="bi bi-stars"></i>
         </a>
 
@@ -90,7 +90,7 @@ $subsystems = [
                 <?php endif; ?>
                 <li><a class="dropdown-item" href="<?= e(appUrl('dashboard.php')) ?>"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
                 <li><a class="dropdown-item" href="<?= e(appUrl('pages/search.php')) ?>"><i class="bi bi-search me-2"></i>Search Records</a></li>
-                <li><a class="dropdown-item" href="<?= e(appUrl('pages/ai_email_reminders.php')) ?>"><i class="bi bi-stars me-2"></i>AI Email Reminders</a></li>
+                <li><a class="dropdown-item" href="<?= e(appUrl('pages/ai_email_reminders.php')) ?>"><i class="bi bi-stars me-2"></i>AI-Assisted Reminders</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="<?= e(appUrl('logout.php')) ?>"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
             </ul>

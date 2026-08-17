@@ -1,47 +1,13 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/../includes/auth.php';
-requireRole([ROLE_ADMIN,ROLE_STAFF,ROLE_COMMITTEE]);
-
-$pageTitle = 'Search & Filter';
-$activeMenu = 'search';
-$extraCss = [appUrl('assets/css/lacms-module-pages.css')];
-
-include __DIR__ . '/../layouts/header.php';
-?>
-<div class="lacms-app-wrapper">
-<?php include __DIR__ . '/../layouts/sidebar.php'; ?>
-<main class="lacms-main-content">
-
-<section class="lacms-module-header">
-    <div>
-        <div class="lacms-module-eyebrow"><i class="bi bi-search"></i> Centralized Record Retrieval</div>
-        <h1>Search and Filter Functions</h1>
-        <p>Unified navigation for quickly locating agendas, calendar events, meetings, deadlines, reminders, and related legislative coordination records.</p>
-    </div>
-</section>
-
-<section class="lacms-panel mb-4">
-    <div class="lacms-panel-heading"><div><h2><i class="bi bi-funnel"></i> Search Filters</h2><p>Client-demo form only.</p></div></div>
-    <div class="lacms-search-preview">
-        <div class="wide"><label>Keyword</label><input type="text" class="form-control" placeholder="Search title, agenda, meeting, deadline..."></div>
-        <div><label>Record Type</label><select class="form-select"><option>All Records</option><option>Legislative Agenda</option><option>Calendar Event</option><option>Meeting</option><option>Deadline</option></select></div>
-        <div><label>Status</label><select class="form-select"><option>All Statuses</option><option>Draft</option><option>Scheduled</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select></div>
-        <div><label>Date From</label><input type="date" class="form-control"></div>
-        <div><label>Date To</label><input type="date" class="form-control"></div>
-        <div><label>Committee / Office</label><input type="text" class="form-control" placeholder="Committee or office"></div>
-        <div><label>Responsible User</label><input type="text" class="form-control" placeholder="Assigned user"></div>
-        <div class="wide actions"><button type="button" class="btn btn-primary" data-ui-preview><i class="bi bi-search"></i> Search Records</button><button type="button" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Clear Filters</button></div>
-    </div>
-</section>
-
-<section class="lacms-panel">
-    <div class="lacms-panel-heading"><div><h2><i class="bi bi-table"></i> Search Results</h2><p>Results will be loaded from the database later.</p></div></div>
-    <div class="lacms-empty-workspace">
-        <i class="bi bi-search"></i>
-        <strong>Search navigation is ready</strong>
-        <span>Database-backed searching, filtering, pagination, and export will be connected during the backend phase.</span>
-    </div>
-</section>
-
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+require_once __DIR__.'/../includes/auth.php';require_once __DIR__.'/../includes/lacms_security.php';requireLacmsPermission('lacms.dashboard.view');
+$pdo=db();$pageTitle='Search & Filter';$activeMenu='search';$extraCss=[appUrl('assets/css/lacms-operational.css')];$term=clean($_GET['q']??'');$results=[];
+if($term!==''){$like='%'.$term.'%';$queries=[
+ ['Agenda','modules/agendas/view.php?id=',"SELECT id,agenda_reference ref,title,status,agenda_date event_date FROM lacms_agendas WHERE agenda_reference LIKE :a OR title LIKE :b OR description LIKE :c ORDER BY updated_at DESC LIMIT 30",'lacms.agendas.view'],
+ ['Calendar','modules/calendar/view.php?id=',"SELECT id,event_reference ref,title,status,start_datetime event_date FROM lacms_calendar_events WHERE event_reference LIKE :a OR title LIKE :b OR description LIKE :c OR venue LIKE :d ORDER BY start_datetime DESC LIMIT 30",'lacms.calendar.view'],
+ ['Meeting','modules/meetings/view.php?id=',"SELECT id,meeting_reference ref,title,status,start_datetime event_date FROM lacms_meetings WHERE meeting_reference LIKE :a OR title LIKE :b OR purpose LIKE :c OR venue LIKE :d ORDER BY start_datetime DESC LIMIT 30",'lacms.meetings.view'],
+ ['Deadline','modules/deadlines/view.php?id=',"SELECT id,deadline_reference ref,title,status,due_datetime event_date FROM lacms_deadlines WHERE deadline_reference LIKE :a OR title LIKE :b OR description LIKE :c ORDER BY due_datetime DESC LIMIT 30",'lacms.deadlines.view'],
+ ['Synchronization','modules/synchronization/view.php?id=',"SELECT id,sync_reference ref,title,status,updated_at event_date FROM lacms_sync_records WHERE sync_reference LIKE :a OR title LIKE :b OR executive_position LIKE :c OR legislative_position LIKE :d ORDER BY updated_at DESC LIMIT 30",'lacms.sync.view'],
+ ];foreach($queries as [$type,$url,$sql,$perm]){if(!lacmsHasPermission($perm))continue;$q=$pdo->prepare($sql);$count=substr_count($sql,':d')?4:3;$params=[':a'=>$like,':b'=>$like,':c'=>$like];if($count===4)$params[':d']=$like;$q->execute($params);foreach($q->fetchAll() as $r)$results[]=array_merge($r,['type'=>$type,'url'=>appUrl($url.$r['id'])]);}}
+include __DIR__.'/../layouts/header.php';?>
+<div class="lacms-app-wrapper"><?php include __DIR__.'/../layouts/sidebar.php'; ?><main class="lacms-main-content"><div class="lo-head"><div><div class="lo-eyebrow"><i class="bi bi-search"></i> Permission-Aware Search</div><h1>Search LACMS Records</h1><p>Search across the operational modules your account is authorized to view.</p></div></div><div class="card lo-card mb-3"><div class="card-body"><form class="input-group"><input class="form-control" name="q" value="<?= e($term) ?>" placeholder="Reference number, title, venue, description or position"><button class="btn btn-primary">Search</button></form></div></div><div class="card lo-card"><div class="list-group list-group-flush"><?php if($term!==''&&!$results): ?><div class="list-group-item text-muted">No matching authorized records.</div><?php endif; ?><?php foreach($results as $r): ?><a class="list-group-item list-group-item-action" href="<?= e($r['url']) ?>"><div class="d-flex justify-content-between gap-3"><div><span class="lo-code"><?= e($r['type'].' · '.$r['ref']) ?></span><div><strong><?= e($r['title']) ?></strong></div></div><div class="text-end small"><?= e($r['status']) ?><br><?= $r['event_date']?formatDateTime($r['event_date']):'' ?></div></div></a><?php endforeach; ?></div></div></main></div><?php include __DIR__.'/../layouts/footer.php'; ?>

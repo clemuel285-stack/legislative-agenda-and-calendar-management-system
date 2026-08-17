@@ -1,129 +1,99 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/includes/auth.php';
-requireRole([ROLE_ADMIN,ROLE_STAFF,ROLE_COMMITTEE]);
 
-$pageTitle = 'Dashboard';
-$activeMenu = 'dashboard';
-$extraCss = [appUrl('assets/css/lacms-dashboard-v2.css')];
+require_once __DIR__.'/includes/auth.php';
+require_once __DIR__.'/includes/lacms_report_helpers.php';
+requireLacmsPermission('lacms.dashboard.view');
 
-$modules = [
-    ['01','Legislative Agenda Management','Create, organize, update, and manage legislative agendas in one centralized workspace.','bi-list-check','modules/agendas/index.php'],
-    ['02','Calendar Scheduling','Schedule meetings, events, and legislative activities while reducing conflicts.','bi-calendar-week','modules/calendar/index.php'],
-    ['03','Meeting Coordination','Plan meetings, participants, agendas, schedules, and communication.','bi-people','modules/meetings/index.php'],
-    ['04','Deadline Tracking','Monitor legislative deadlines, assignments, due dates, reminders, and overdue tasks.','bi-alarm','modules/deadlines/index.php'],
-];
+$pdo=db();$pageTitle='Dashboard';$activeMenu='dashboard';
+$extraCss=[appUrl('assets/css/lacms-dashboard-v2.css'),appUrl('assets/css/lacms-operational.css')];
 
-include __DIR__ . '/layouts/header.php';
+$stats=lacmsDashboardStats($pdo);
+
+$today=$pdo->query(
+ "SELECT id,event_reference,title,event_type,start_datetime,end_datetime,venue,status,conflict_status
+  FROM lacms_calendar_events
+  WHERE DATE(start_datetime)=CURDATE()
+    AND status<>'Cancelled'
+  ORDER BY start_datetime"
+)->fetchAll();
+
+$deadlineWatch=$pdo->query(
+ "SELECT id,deadline_reference,title,due_datetime,priority_level,status
+  FROM lacms_deadlines
+  WHERE status IN ('Overdue','Pending','In Progress')
+  ORDER BY FIELD(status,'Overdue','In Progress','Pending'),due_datetime
+  LIMIT 8"
+)->fetchAll();
+
+$meetingWatch=$pdo->query(
+ "SELECT id,meeting_reference,title,start_datetime,venue,status
+  FROM lacms_meetings
+  WHERE status IN ('Planned','Confirmed','In Progress','Postponed')
+  ORDER BY start_datetime LIMIT 8"
+)->fetchAll();
+
+$activity=lacmsMonthlyActivity($pdo);
+$deadlineDist=lacmsDeadlineStatusDistribution($pdo);
+
+$recent=[];
+if(lacmsSystemId()){
+    $q=$pdo->prepare(
+      "SELECT al.action,al.details,al.created_at,u.full_name
+       FROM activity_logs al
+       LEFT JOIN users u ON u.id=al.user_id
+       WHERE al.system_id=:system
+       ORDER BY al.created_at DESC,al.id DESC LIMIT 8"
+    );
+    $q->execute([':system'=>lacmsSystemId()]);$recent=$q->fetchAll();
+}
+
+include __DIR__.'/layouts/header.php';
 ?>
-<div class="lacms-app-wrapper">
-<?php include __DIR__ . '/layouts/sidebar.php'; ?>
-<main class="lacms-main-content">
+<div class="lacms-app-wrapper"><?php include __DIR__.'/layouts/sidebar.php'; ?><main class="lacms-main-content">
 
 <section class="lacms-dashboard-hero">
-    <div>
-        <div class="lacms-dashboard-eyebrow"><i class="bi bi-building"></i> Local Government Unit of Manila</div>
-        <h1>Legislative Agenda and Calendar Management System</h1>
-        <p>A modern, intelligent, and centralized legislative management system designed to improve the organization of agendas, schedules, meetings, deadlines, communication, monitoring, and decision support through automation and future artificial intelligence.</p>
-        <div class="lacms-dashboard-hero-actions">
-            <a href="<?= e(appUrl('modules/agendas/index.php')) ?>" class="btn btn-warning"><i class="bi bi-list-check"></i> Open Legislative Agendas</a>
-            <a href="<?= e(appUrl('modules/calendar/index.php')) ?>" class="btn btn-outline-light"><i class="bi bi-calendar3"></i> Open Master Calendar</a>
-        </div>
-    </div>
-
-    <div class="lacms-intelligence-overview">
-        <span><i class="bi bi-stars"></i></span>
-        <div>
-            <small>Planned Intelligent Feature</small>
-            <strong>AI-Assisted Email Reminders</strong>
-            <p>Future automation will support upcoming meetings, deadlines, and scheduled legislative activities.</p>
-        </div>
-    </div>
+<div><div class="lacms-dashboard-eyebrow"><i class="bi bi-building"></i> Local Government Unit of Manila</div><h1>Legislative Agenda and Calendar Management System</h1><p>Operational monitoring for agendas, calendar schedules, meetings, deadlines, reminders, notifications and legislative coordination.</p><div class="lacms-dashboard-hero-actions"><a href="<?= e(appUrl('modules/agendas/index.php')) ?>" class="btn btn-warning"><i class="bi bi-list-check"></i> Agendas</a><a href="<?= e(appUrl('modules/calendar/index.php')) ?>" class="btn btn-outline-light"><i class="bi bi-calendar3"></i> Master Calendar</a><a href="<?= e(appUrl('reports/index.php')) ?>" class="btn btn-outline-light"><i class="bi bi-bar-chart"></i> Reports</a></div></div>
+<div class="lacms-intelligence-overview"><span><i class="bi bi-stars"></i></span><div><small>Coordination Intelligence</small><strong><?= $stats['overdue'] ?> overdue · <?= $stats['conflicts'] ?> conflict(s)</strong><p><?= $stats['notifications'] ?> reminder/notification record(s) require delivery/follow-up; <?= $stats['sync_attention'] ?> synchronization record(s) need attention.</p></div></div>
 </section>
 
-<section class="lacms-problem-strip">
-    <div><i class="bi bi-list-check"></i><span><small>Disorganized Agendas</small><strong>Central Agenda Management</strong></span></div>
-    <div><i class="bi bi-alarm"></i><span><small>Missed Deadlines</small><strong>Automated Reminder Ready</strong></span></div>
-    <div><i class="bi bi-envelope-paper"></i><span><small>Inefficient Communication</small><strong>Email Notifications</strong></span></div>
-    <div><i class="bi bi-calendar-x"></i><span><small>Scheduling Conflicts</small><strong>Central Calendar Coordination</strong></span></div>
-    <div><i class="bi bi-eye"></i><span><small>No Central Monitoring</small><strong>Dashboard & Reports</strong></span></div>
-</section>
-
-<section class="lacms-dashboard-panel mb-4">
-    <div class="lacms-dashboard-panel-heading">
-        <div><h2><i class="bi bi-grid-3x3-gap"></i> Core Legislative Coordination Modules</h2><p>Revised based on the current project vision and scope.</p></div>
-    </div>
-
-    <div class="lacms-dashboard-module-grid">
-        <?php foreach ($modules as [$number,$title,$description,$icon,$href]): ?>
-        <a href="<?= e(appUrl($href)) ?>" class="lacms-dashboard-module-card">
-            <span class="module-number"><?= e($number) ?></span>
-            <span class="module-icon"><i class="bi <?= e($icon) ?>"></i></span>
-            <div><strong><?= e($title) ?></strong><small><?= e($description) ?></small></div>
-            <i class="bi bi-arrow-right"></i>
-        </a>
-        <?php endforeach; ?>
-    </div>
-</section>
+<div class="row g-3 mb-4"><?php foreach([
+ [$stats['agendas'],'Active Agendas','bi-list-check'],
+ [$stats['upcoming_events'],'Upcoming Events','bi-calendar-event'],
+ [$stats['meetings'],'Open Meetings','bi-people'],
+ [$stats['deadlines'],'Open Deadlines','bi-alarm'],
+ [$stats['overdue'],'Overdue','bi-exclamation-triangle'],
+ [$stats['notifications'],'Notification Queue','bi-envelope-paper'],
+ [$stats['sync_open'],'Open Sync Records','bi-arrow-left-right'],
+] as [$v,$l,$i]): ?><div class="col-6 col-xl-2"><div class="lo-stat h-100"><i class="bi <?= e($i) ?>"></i><div><strong><?= (int)$v ?></strong><small><?= e($l) ?></small></div></div></div><?php endforeach; ?></div>
 
 <div class="row g-4 mb-4">
-    <div class="col-xl-7">
-        <section class="lacms-dashboard-panel h-100">
-            <div class="lacms-dashboard-panel-heading">
-                <div><h2><i class="bi bi-bell"></i> Automation & Communication</h2><p>Reminder and meeting-notification features in scope.</p></div>
-            </div>
-
-            <div class="lacms-dashboard-feature-list">
-                <a href="<?= e(appUrl('pages/ai_email_reminders.php')) ?>">
-                    <i class="bi bi-stars"></i>
-                    <span><strong>AI-Based Automated Email Reminder</strong><small>Planned AI-assisted reminders for meetings, deadlines, and scheduled activities.</small></span>
-                    <em>PLANNED</em>
-                </a>
-
-                <a href="<?= e(appUrl('pages/meeting_notifications.php')) ?>">
-                    <i class="bi bi-envelope-paper"></i>
-                    <span><strong>Meeting Notifications</strong><small>Email communication for schedules, updates, changes, and cancellations.</small></span>
-                    <i class="bi bi-arrow-right"></i>
-                </a>
-
-                <a href="<?= e(appUrl('pages/search.php')) ?>">
-                    <i class="bi bi-search"></i>
-                    <span><strong>Search & Filter</strong><small>Locate agendas, meetings, events, deadlines, and other records quickly.</small></span>
-                    <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </section>
-    </div>
-
-    <div class="col-xl-5">
-        <section class="lacms-dashboard-panel h-100">
-            <div class="lacms-dashboard-panel-heading">
-                <div><h2><i class="bi bi-shield-lock"></i> Security & Accountability</h2><p>In-scope administrative controls.</p></div>
-            </div>
-
-            <div class="lacms-security-list">
-                <div><i class="bi bi-person-lock"></i><span><strong>User Login & Authentication</strong><small>Authorized access to the platform.</small></span></div>
-                <div><i class="bi bi-person-gear"></i><span><strong>Role-Based User Management</strong><small>Permissions based on user role.</small></span></div>
-                <div><i class="bi bi-clock-history"></i><span><strong>Activity Logs</strong><small>Audit trail for accountability.</small></span></div>
-                <div><i class="bi bi-database-lock"></i><span><strong>Secure Database Management</strong><small>Protected centralized legislative data.</small></span></div>
-            </div>
-        </section>
-    </div>
+<div class="col-xl-7"><div class="card lo-card h-100"><div class="card-header">Six-Month Legislative Coordination Activity</div><div class="card-body"><canvas id="activityChart" height="120"></canvas></div></div></div>
+<div class="col-xl-5"><div class="card lo-card h-100"><div class="card-header">Deadline Status Distribution</div><div class="card-body"><canvas id="deadlineChart" height="160"></canvas></div></div></div>
 </div>
 
-<section class="lacms-dashboard-panel">
-    <div class="lacms-dashboard-panel-heading">
-        <div><h2><i class="bi bi-check2-square"></i> Navigation Phase Status</h2><p>Revised scope implementation checklist.</p></div>
-    </div>
+<div class="row g-4 mb-4">
+<div class="col-xl-6"><div class="card lo-card h-100"><div class="card-header d-flex justify-content-between"><span>Today's Legislative Calendar</span><a class="btn btn-sm btn-outline-light" href="<?= e(appUrl('modules/calendar/index.php')) ?>">Calendar</a></div><div class="list-group list-group-flush"><?php if(!$today): ?><div class="list-group-item text-muted">No scheduled activity today.</div><?php endif; ?><?php foreach($today as $e): ?><a class="list-group-item list-group-item-action" href="<?= e(appUrl('modules/calendar/view.php?id='.$e['id'])) ?>"><div class="d-flex justify-content-between"><div><strong><?= e($e['title']) ?></strong><div class="small text-muted"><?= e($e['event_reference'].' · '.$e['event_type'].' · '.($e['venue']?:'TBA')) ?></div></div><div class="text-end small"><?= formatTime($e['start_datetime']) ?><br><?= e($e['status']) ?></div></div></a><?php endforeach; ?></div></div></div>
+<div class="col-xl-6"><div class="card lo-card h-100"><div class="card-header d-flex justify-content-between"><span>Deadline Watch</span><a class="btn btn-sm btn-outline-light" href="<?= e(appUrl('modules/deadlines/index.php')) ?>">Deadlines</a></div><div class="list-group list-group-flush"><?php if(!$deadlineWatch): ?><div class="list-group-item text-muted">No active deadline watch items.</div><?php endif; ?><?php foreach($deadlineWatch as $d): ?><a class="list-group-item list-group-item-action" href="<?= e(appUrl('modules/deadlines/view.php?id='.$d['id'])) ?>"><div class="d-flex justify-content-between"><div><strong><?= e($d['title']) ?></strong><div class="small text-muted"><?= e($d['deadline_reference'].' · '.$d['priority_level']) ?></div></div><div class="text-end small"><?= formatDateTime($d['due_datetime']) ?><br><span class="<?= $d['status']==='Overdue'?'text-danger fw-bold':'' ?>"><?= e($d['status']) ?></span></div></div></a><?php endforeach; ?></div></div></div>
+</div>
 
-    <div class="lacms-status-grid">
-        <div class="done"><i class="bi bi-check-circle-fill"></i><span><strong>Legislative Agenda Management</strong><small>Revised module navigation ready</small></span></div>
-        <div class="done"><i class="bi bi-check-circle-fill"></i><span><strong>Calendar & Meeting Coordination</strong><small>Scheduling and coordination pages ready</small></span></div>
-        <div class="done"><i class="bi bi-check-circle-fill"></i><span><strong>Deadline Tracking</strong><small>Due-soon and overdue navigation ready</small></span></div>
-        <div class="done"><i class="bi bi-check-circle-fill"></i><span><strong>Reports, Search & Activity Logs</strong><small>Administrative navigation represented</small></span></div>
-        <div class="planned"><i class="bi bi-clock-fill"></i><span><strong>AI Email Reminder Backend</strong><small>Planned for future development</small></span></div>
-        <div class="planned"><i class="bi bi-clock-fill"></i><span><strong>Database CRUD & Email Delivery</strong><small>Intentionally postponed</small></span></div>
-    </div>
-</section>
+<div class="row g-4">
+<div class="col-xl-6"><div class="card lo-card h-100"><div class="card-header">Meeting Coordination Queue</div><div class="list-group list-group-flush"><?php if(!$meetingWatch): ?><div class="list-group-item text-muted">No open meetings.</div><?php endif; ?><?php foreach($meetingWatch as $m): ?><a class="list-group-item list-group-item-action" href="<?= e(appUrl('modules/meetings/view.php?id='.$m['id'])) ?>"><strong><?= e($m['meeting_reference'].' · '.$m['title']) ?></strong><div class="small text-muted"><?= formatDateTime($m['start_datetime']) ?> · <?= e($m['venue']?:'TBA') ?> · <?= e($m['status']) ?></div></a><?php endforeach; ?></div></div></div>
+<div class="col-xl-6"><div class="card lo-card h-100"><div class="card-header">Recent LACMS Activity</div><div class="list-group list-group-flush"><?php if(!$recent): ?><div class="list-group-item text-muted">No recent LACMS activity.</div><?php endif; ?><?php foreach($recent as $x): ?><div class="list-group-item"><strong class="small"><?= e($x['action']) ?></strong><div class="small text-muted"><?= e($x['full_name']?:'System') ?> · <?= formatDateTime($x['created_at']) ?></div><?php if($x['details']): ?><div class="small"><?= e(mb_strimwidth($x['details'],0,150,'…')) ?></div><?php endif; ?></div><?php endforeach; ?></div></div></div>
+</div>
 
-<?php include __DIR__ . '/layouts/footer.php'; ?>
+</main></div>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ const activity=<?= json_encode($activity,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
+ new Chart(document.getElementById('activityChart'),{type:'bar',data:{labels:activity.map(x=>x.label),datasets:[
+  {label:'Calendar Events',data:activity.map(x=>Number(x.events))},
+  {label:'Meetings',data:activity.map(x=>Number(x.meetings))},
+  {label:'Deadlines',data:activity.map(x=>Number(x.deadlines))}
+ ]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+ const dd=<?= json_encode($deadlineDist,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
+ new Chart(document.getElementById('deadlineChart'),{type:'doughnut',data:{labels:dd.map(x=>x.label),datasets:[{data:dd.map(x=>Number(x.total))}]},options:{responsive:true}});
+});
+</script>
+<?php include __DIR__.'/layouts/footer.php'; ?>

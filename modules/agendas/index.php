@@ -1,141 +1,84 @@
 <?php
 declare(strict_types=1);
 
-$moduleTitle = 'Legislative Agenda Management Module';
-$moduleKey = 'agendas';
-$moduleIcon = 'bi-list-check';
-$moduleDescription = 'Allows authorized users to create, organize, update, prioritize, and manage legislative agendas in one centralized workspace.';
-$primaryAction = 'New Agenda';
-$problemLink = 'Difficulty in organizing legislative agendas and related meeting schedules because agenda records are handled through fragmented manual processes.';
+require_once __DIR__.'/../../includes/lacms_operational_helpers.php';
+requireLacmsPermission('lacms.agendas.view');
 
-$moduleFeatures = [
-    [
-        'icon' => 'bi-file-earmark-plus',
-        'title' => 'Create Legislative Agenda',
-        'description' => 'Create a structured agenda for a session, committee meeting, or legislative activity.',
-    ],
-    [
-        'icon' => 'bi-list-ol',
-        'title' => 'Agenda Item Organization',
-        'description' => 'Arrange agenda items, sequence, topic, sponsor, committee, and supporting references.',
-    ],
-    [
-        'icon' => 'bi-arrow-down-up',
-        'title' => 'Reorder & Prioritize',
-        'description' => 'Prepare sequence-based ordering and priority arrangement for agenda items.',
-    ],
-    [
-        'icon' => 'bi-pencil-square',
-        'title' => 'Agenda Updates',
-        'description' => 'Revise agenda details, items, notes, and status before finalization.',
-    ],
-    [
-        'icon' => 'bi-link-45deg',
-        'title' => 'Meeting Linkage',
-        'description' => 'Connect an agenda to its scheduled meeting or legislative event.',
-    ],
-    [
-        'icon' => 'bi-search',
-        'title' => 'Search & Filter',
-        'description' => 'Locate agendas by date, committee, meeting, status, title, or keyword.',
-    ],
-];
+$pdo=db();$pageTitle='Legislative Agenda Management';$activeMenu='agendas';
+$extraCss=[appUrl('assets/css/lacms-operational.css')];
 
-$moduleSections = [
-    [
-        'icon' => 'bi-inboxes',
-        'title' => 'Agenda Registry',
-        'description' => 'Centralized list of draft, scheduled, finalized, and archived agendas.',
-    ],
-    [
-        'icon' => 'bi-list-ol',
-        'title' => 'Agenda Items',
-        'description' => 'Detailed items, sequence, presenters, and references.',
-    ],
-    [
-        'icon' => 'bi-calendar-link',
-        'title' => 'Linked Meetings',
-        'description' => 'View the meeting or event associated with an agenda.',
-    ],
-    [
-        'icon' => 'bi-pencil-square',
-        'title' => 'Draft & Revision',
-        'description' => 'Prepare and update agendas before finalization.',
-    ],
-    [
-        'icon' => 'bi-check2-circle',
-        'title' => 'Finalized Agendas',
-        'description' => 'Client-ready view for approved or finalized agenda sets.',
-    ],
-    [
-        'icon' => 'bi-clock-history',
-        'title' => 'Agenda History',
-        'description' => 'Future revision and activity history for accountability.',
-    ],
-];
+$search=clean($_GET['search']??'');$status=clean($_GET['status']??'');$committee=(int)($_GET['committee_id']??0);
+$where=[];$params=[];
+if($search!==''){$where[]='(a.agenda_reference LIKE :s1 OR a.title LIKE :s2 OR a.description LIKE :s3)';$like='%'.$search.'%';$params[':s1']=$like;$params[':s2']=$like;$params[':s3']=$like;}
+if($status!==''){$where[]='a.status=:status';$params[':status']=$status;}
+if($committee>0){$where[]='a.committee_id=:committee';$params[':committee']=$committee;}
+$sqlWhere=$where?'WHERE '.implode(' AND ',$where):'';
 
-$workflowSteps = [
-    [
-        'title' => 'Create Agenda',
-        'description' => 'Authorized user opens a new legislative agenda.',
-    ],
-    [
-        'title' => 'Add Items',
-        'description' => 'Agenda items, descriptions, proponents, and references are added.',
-    ],
-    [
-        'title' => 'Organize',
-        'description' => 'Items are ordered and grouped for the intended meeting.',
-    ],
-    [
-        'title' => 'Link Schedule',
-        'description' => 'Agenda is connected to a calendar event or meeting.',
-    ],
-    [
-        'title' => 'Finalize',
-        'description' => 'Agenda is reviewed and marked ready for circulation.',
-    ],
-    [
-        'title' => 'Notify',
-        'description' => 'Future email notification informs participants of the finalized agenda.',
-    ],
-];
+$stmt=$pdo->prepare(
+ "SELECT a.*,c.name committee_name,o.name office_name,u.full_name created_name,
+         (SELECT COUNT(*) FROM lacms_agenda_items i WHERE i.agenda_id=a.id AND i.item_status<>'Removed') item_count,
+         (SELECT COUNT(*) FROM lacms_calendar_events e WHERE e.agenda_id=a.id AND e.status<>'Cancelled') linked_events,
+         (SELECT COUNT(*) FROM lacms_meetings m WHERE m.agenda_id=a.id AND m.status<>'Cancelled') linked_meetings
+  FROM lacms_agendas a
+  LEFT JOIN committees c ON c.id=a.committee_id
+  LEFT JOIN offices o ON o.id=a.office_id
+  LEFT JOIN users u ON u.id=a.created_by
+  {$sqlWhere}
+  ORDER BY COALESCE(a.agenda_date,'9999-12-31'),a.created_at DESC"
+);
+$stmt->execute($params);$rows=$stmt->fetchAll();
 
-$quickActions = [
-    [
-        'icon' => 'bi-file-earmark-plus',
-        'title' => 'Create Agenda',
-        'description' => 'Start a new legislative agenda.',
-    ],
-    [
-        'icon' => 'bi-inboxes',
-        'title' => 'Agenda Registry',
-        'description' => 'Browse all agenda records.',
-    ],
-    [
-        'icon' => 'bi-calendar-link',
-        'title' => 'Linked Meetings',
-        'description' => 'Navigate agendas connected to scheduled meetings.',
-    ],
-];
+$committees=$pdo->query("SELECT id,name FROM committees WHERE status='Active' ORDER BY name")->fetchAll();
+$offices=$pdo->query("SELECT id,name FROM offices WHERE status='Active' ORDER BY name")->fetchAll();
 
-$recordFields = [
-    'Agenda title',
-    'Agenda date',
-    'Meeting or session type',
-    'Committee / responsible body',
-    'Agenda item sequence',
-    'Agenda item title and description',
-    'Sponsor / presenter',
-    'Supporting reference',
-    'Agenda status',
-    'Linked calendar event',
-];
+$stats=$pdo->query(
+ "SELECT COUNT(*) total,SUM(status='Draft') drafts,SUM(status='Under Review') review_count,
+         SUM(status='Finalized') finalized,SUM(status='Cancelled') cancelled
+  FROM lacms_agendas"
+)->fetch()?:[];
 
-$previousModule = null;
-$nextModule = [
-    'label' => 'Calendar Scheduling Module',
-    'href' => 'modules/calendar/index.php',
-];
+include __DIR__.'/../../layouts/header.php';
+?>
+<div class="lacms-app-wrapper"><?php include __DIR__.'/../../layouts/sidebar.php'; ?><main class="lacms-main-content">
+<div class="lo-head"><div><div class="lo-eyebrow"><i class="bi bi-list-check"></i> Step 2 · Operational Backend</div><h1>Legislative Agenda Management</h1><p>Create structured legislative agendas, organize and prioritize agenda items, link legislative records, prepare final agenda sets, and preserve the full agenda history.</p></div><?php if(lacmsOperationalManager()): ?><button class="btn btn-primary" id="btnNewAgenda"><i class="bi bi-plus-circle"></i> New Agenda</button><?php endif; ?></div>
 
-require __DIR__ . '/../../includes/lacms_scope_module.php';
+<div class="lo-flow"><div><strong>1. Create Agenda</strong><small>Session, committee, date</small></div><div><strong>2. Add Items</strong><small>Legislative references</small></div><div><strong>3. Organize</strong><small>Sections and sequence</small></div><div><strong>4. Review</strong><small>Validate completeness</small></div><div><strong>5. Finalize</strong><small>Lock official agenda</small></div><div><strong>6. Link Schedule</strong><small>Calendar / meetings</small></div></div>
+
+<div class="row g-3 mb-3"><?php foreach([
+ ['Agendas',$stats['total']??0,'bi-inboxes'],['Draft',$stats['drafts']??0,'bi-pencil-square'],
+ ['Under Review',$stats['review_count']??0,'bi-search'],['Finalized',$stats['finalized']??0,'bi-check2-circle'],
+ ['Cancelled',$stats['cancelled']??0,'bi-x-circle']
+] as [$l,$v,$i]): ?><div class="col-6 col-xl"><div class="lo-stat"><i class="bi <?= e($i) ?>"></i><div><strong><?= (int)$v ?></strong><small><?= e($l) ?></small></div></div></div><?php endforeach; ?></div>
+
+<div class="card lo-card mb-3"><div class="card-body"><form class="row g-2 align-items-end">
+<div class="col-xl-5"><label class="form-label small">Search</label><input class="form-control form-control-sm" name="search" value="<?= e($search) ?>" placeholder="Agenda reference, title or description"></div>
+<div class="col-xl-3"><label class="form-label small">Status</label><select class="form-select form-select-sm" name="status"><option value="">All statuses</option><?php foreach(lacmsAgendaStatuses() as $s): ?><option <?= $status===$s?'selected':'' ?>><?= e($s) ?></option><?php endforeach; ?></select></div>
+<div class="col-xl-2"><label class="form-label small">Committee</label><select class="form-select form-select-sm" name="committee_id"><option value="">All committees</option><?php foreach($committees as $c): ?><option value="<?= (int)$c['id'] ?>" <?= $committee===(int)$c['id']?'selected':'' ?>><?= e($c['name']) ?></option><?php endforeach; ?></select></div>
+<div class="col-xl-2"><button class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-funnel"></i> Apply</button></div>
+</form></div></div>
+
+<div class="card lo-card"><div class="card-header d-flex justify-content-between"><span>Agenda Registry</span><a href="report.php" class="btn btn-sm btn-outline-light">Report</a></div><div class="table-responsive"><table class="table table-hover lo-table mb-0"><thead><tr><th>Agenda</th><th>Schedule</th><th>Committee / Office</th><th>Items</th><th>Linked Schedule</th><th>Status</th><th>Created By</th><th class="text-end">Open</th></tr></thead><tbody>
+<?php if(!$rows): ?><tr><td colspan="8" class="text-center text-muted py-5">No legislative agendas found.</td></tr><?php endif; ?>
+<?php foreach($rows as $r): ?><tr><td><span class="lo-code"><?= e($r['agenda_reference']) ?></span><div><strong><?= e($r['title']) ?></strong></div><div class="small text-muted"><?= e($r['agenda_type']) ?></div></td><td><?= $r['agenda_date']?formatDate($r['agenda_date']):'Unscheduled' ?><div class="small text-muted"><?= $r['start_time']?formatTime($r['start_time']):'—' ?><?= $r['end_time']?' - '.formatTime($r['end_time']):'' ?></div></td><td><?= e($r['committee_name']?:'No committee') ?><div class="small text-muted"><?= e($r['office_name']?:'No office') ?></div></td><td><?= (int)$r['item_count'] ?></td><td><?= (int)$r['linked_events'] ?> event(s)<div class="small text-muted"><?= (int)$r['linked_meetings'] ?> meeting(s)</div></td><td><span class="lo-status <?= $r['status']==='Finalized'?'good':($r['status']==='Cancelled'?'bad':($r['status']==='Under Review'?'warn':'')) ?>"><?= e($r['status']) ?></span></td><td><?= e($r['created_name']?:'System') ?></td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="view.php?id=<?= (int)$r['id'] ?>"><i class="bi bi-eye"></i></a></td></tr><?php endforeach; ?>
+</tbody></table></div></div>
+</main></div>
+
+<?php if(lacmsOperationalManager()): ?>
+<div class="modal fade" id="agendaModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><form id="agendaForm"><?= csrfField() ?><input type="hidden" name="id" value="0"><div class="modal-header bg-dark text-white"><h5 class="modal-title">New Legislative Agenda</h5><button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="row g-3">
+<div class="col-12"><label class="form-label">Agenda Title *</label><input class="form-control" name="title" required></div>
+<div class="col-md-4"><label class="form-label">Agenda Type</label><select class="form-select" name="agenda_type"><option>Legislative Session</option><option>Committee Meeting</option><option>Special Session</option><option>Public Deliberation</option><option>Coordination Meeting</option><option>Other</option></select></div>
+<div class="col-md-4"><label class="form-label">Committee</label><select class="form-select" name="committee_id"><option value="">None</option><?php foreach($committees as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['name']) ?></option><?php endforeach; ?></select></div>
+<div class="col-md-4"><label class="form-label">Responsible Office</label><select class="form-select" name="office_id"><option value="">None</option><?php foreach($offices as $o): ?><option value="<?= (int)$o['id'] ?>"><?= e($o['name']) ?></option><?php endforeach; ?></select></div>
+<div class="col-md-4"><label class="form-label">Agenda Date</label><input type="date" class="form-control" name="agenda_date"></div><div class="col-md-4"><label class="form-label">Start Time</label><input type="time" class="form-control" name="start_time"></div><div class="col-md-4"><label class="form-label">End Time</label><input type="time" class="form-control" name="end_time"></div>
+<div class="col-md-6"><label class="form-label">Venue</label><input class="form-control" name="venue"></div><div class="col-md-6"><label class="form-label">Meeting Link</label><input type="url" class="form-control" name="meeting_link"></div>
+<div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" rows="3"></textarea></div><div class="col-12"><label class="form-label">Administrative Notes</label><textarea class="form-control" name="notes" rows="2"></textarea></div>
+</div></div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Create Agenda</button></div></form></div></div></div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ const form=document.getElementById('agendaForm'),modal=new bootstrap.Modal(document.getElementById('agendaModal'));
+ document.getElementById('btnNewAgenda').onclick=()=>{form.reset();modal.show();};
+ form.onsubmit=async e=>{e.preventDefault();const r=await fetch('ajax_save.php',{method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'},body:new FormData(form)}).then(x=>x.json());if(r.success)location.href='view.php?id='+r.id;else Swal.fire('Agenda Error',r.message,'error');};
+});
+</script>
+<?php endif; ?>
+<?php include __DIR__.'/../../layouts/footer.php'; ?>

@@ -1,209 +1,25 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/../../includes/lacms_operational_helpers.php';
+requireLacmsPermission('lacms.meetings.view');
 
-require_once __DIR__ . '/../../includes/auth.php';
-
-requireRole([ROLE_ADMIN, ROLE_STAFF, ROLE_COMMITTEE]);
-
-$pageTitle  = 'Meeting Coordination Report';
-$activeMenu = 'meetings';
-$extraCss   = [appUrl('assets/css/meetings.css')];
-
-$pdo = db();
-
-$byPriority = $pdo->query(
-    "SELECT
-        li.priority_level,
-        COUNT(*) AS total
-     FROM legislative_items li
-     INNER JOIN legislative_item_types lit
-        ON lit.id = li.item_type_id
-     WHERE li.deleted_at IS NULL
-       AND lit.code IN ('ordinance', 'resolution')
-     GROUP BY li.priority_level
-     ORDER BY FIELD(
-        li.priority_level,
-        'Urgent',
-        'High',
-        'Normal',
-        'Low'
-     )"
+$rows=db()->query(
+ "SELECT m.meeting_reference,m.title,m.meeting_type,m.start_datetime,m.end_datetime,
+         m.venue,m.status,a.agenda_reference,e.event_reference,e.conflict_status,
+         c.name committee_name,cu.full_name chair_name,su.full_name secretary_name,
+         (SELECT COUNT(*) FROM lacms_meeting_participants p WHERE p.meeting_id=m.id) participants,
+         (SELECT COUNT(*) FROM lacms_meeting_participants p WHERE p.meeting_id=m.id AND p.attendance_required=1) required_participants
+  FROM lacms_meetings m
+  LEFT JOIN lacms_agendas a ON a.id=m.agenda_id
+  LEFT JOIN lacms_calendar_events e ON e.id=m.calendar_event_id
+  LEFT JOIN committees c ON c.id=m.committee_id
+  LEFT JOIN users cu ON cu.id=m.chair_user_id
+  LEFT JOIN users su ON su.id=m.secretary_user_id
+  ORDER BY m.start_datetime DESC"
 )->fetchAll();
 
-$byStatus = $pdo->query(
-    "SELECT
-        li.current_status,
-        COUNT(*) AS total
-     FROM legislative_items li
-     INNER JOIN legislative_item_types lit
-        ON lit.id = li.item_type_id
-     WHERE li.deleted_at IS NULL
-       AND lit.code IN ('ordinance', 'resolution')
-     GROUP BY li.current_status
-     ORDER BY total DESC, li.current_status"
-)->fetchAll();
-
-$total = array_sum(array_map(
-    'intval',
-    array_column($byPriority, 'total')
-));
-
-include __DIR__ . '/../../layouts/header.php';
+$pageTitle='Meeting Coordination Report';$activeMenu='meetings';$extraCss=[appUrl('assets/css/lacms-operational.css')];
+include __DIR__.'/../../layouts/header.php';
 ?>
-
-<div class="app-wrapper">
-    <?php include __DIR__ . '/../../layouts/sidebar.php'; ?>
-
-    <main class="main-content">
-
-        <section class="meeting-page-header">
-            <div>
-                <a href="index.php" class="meeting-back-link">
-                    <i class="bi bi-arrow-left"></i>
-                    Back to Meeting Coordination
-                </a>
-
-                <div class="meeting-eyebrow">
-                    <i class="bi bi-bar-chart"></i>
-                    Coordination Analytics
-                </div>
-
-                <h1>Meeting Coordination Report</h1>
-
-                <p>
-                    Review legislative coordination candidates by
-                    priority level and workflow status.
-                </p>
-            </div>
-
-            <div class="meeting-header-actions">
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    onclick="window.print()"
-                >
-                    <i class="bi bi-printer"></i>
-                    Print Report
-                </button>
-            </div>
-        </section>
-
-        <section class="row g-3 mb-4">
-            <?php
-            $cards = [
-                ['value' => $total, 'label' => 'Total Coordination Candidates', 'icon' => 'bi-files'],
-                ['value' => 0, 'label' => 'Saved Meeting Records', 'icon' => 'bi-calendar-event'],
-                ['value' => 0, 'label' => 'Confirmed Participants', 'icon' => 'bi-person-check'],
-            ];
-            ?>
-
-            <?php foreach ($cards as $card): ?>
-                <div class="col-md-4">
-                    <div class="meeting-summary-card">
-                        <span class="summary-icon">
-                            <i class="bi <?= e($card['icon']) ?>"></i>
-                        </span>
-
-                        <strong><?= (int)$card['value'] ?></strong>
-                        <span><?= e($card['label']) ?></span>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </section>
-
-        <div class="row g-4">
-            <div class="col-xl-7">
-                <section class="meeting-panel h-100">
-                    <div class="meeting-panel-heading">
-                        <div>
-                            <h2>
-                                <i class="bi bi-bar-chart"></i>
-                                Candidates by Priority
-                            </h2>
-                        </div>
-                    </div>
-
-                    <div class="meeting-report-chart">
-                        <canvas id="meetingPriorityChart"></canvas>
-                    </div>
-                </section>
-            </div>
-
-            <div class="col-xl-5">
-                <section class="meeting-panel h-100">
-                    <div class="meeting-panel-heading">
-                        <div>
-                            <h2>
-                                <i class="bi bi-list-check"></i>
-                                Workflow Status Summary
-                            </h2>
-                        </div>
-                    </div>
-
-                    <div class="meeting-report-list">
-                        <?php if (empty($byStatus)): ?>
-                            <div class="meeting-empty-state compact">
-                                <i class="bi bi-bar-chart"></i>
-                                <strong>No coordination data available</strong>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php foreach ($byStatus as $row): ?>
-                            <div class="meeting-report-list-item">
-                                <span><?= e($row['current_status']) ?></span>
-                                <strong><?= (int)$row['total'] ?></strong>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </section>
-            </div>
-        </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const canvas = document.getElementById('meetingPriorityChart');
-
-    if (!canvas || typeof Chart === 'undefined') {
-        return;
-    }
-
-    new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode(
-                array_column($byPriority, 'priority_level'),
-                JSON_UNESCAPED_UNICODE
-            ) ?>,
-            datasets: [{
-                label: 'Candidates',
-                data: <?= json_encode(array_map(
-                    'intval',
-                    array_column($byPriority, 'total')
-                )) ?>,
-                backgroundColor: [
-                    '#ef4444',
-                    '#f59e0b',
-                    '#1d6fb8',
-                    '#64748b'
-                ],
-                borderRadius: 7
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 }
-                }
-            }
-        }
-    });
-});
-</script>
-
-<?php include __DIR__ . '/../../layouts/footer.php'; ?>
+<div class="lacms-app-wrapper"><?php include __DIR__.'/../../layouts/sidebar.php'; ?><main class="lacms-main-content"><div class="lo-head"><div><div class="lo-eyebrow">Operational Report</div><h1>Meeting Coordination Report</h1><p>Meeting schedules, linked agendas/calendar events, committee leadership, participant counts, conflict status and current coordination state.</p></div><a class="btn btn-outline-secondary" href="index.php">Meeting Registry</a></div><div class="card lo-card"><div class="table-responsive"><table class="table lo-table mb-0"><thead><tr><th>Meeting</th><th>Type</th><th>Schedule</th><th>Agenda / Calendar</th><th>Committee</th><th>Chair / Secretary</th><th>Participants</th><th>Conflict</th><th>Status</th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= e($r['meeting_reference']) ?><div class="small text-muted"><?= e($r['title']) ?></div></td><td><?= e($r['meeting_type']) ?></td><td><?= formatDateTime($r['start_datetime']) ?></td><td><?= e($r['agenda_reference']?:'—') ?><div class="small text-muted"><?= e($r['event_reference']?:'—') ?></div></td><td><?= e($r['committee_name']?:'—') ?></td><td><?= e($r['chair_name']?:'—') ?><div class="small text-muted"><?= e($r['secretary_name']?:'—') ?></div></td><td><?= (int)$r['participants'] ?> / <?= (int)$r['required_participants'] ?> req.</td><td><?= e($r['conflict_status']?:'Unchecked') ?></td><td><?= e($r['status']) ?></td></tr><?php endforeach; ?></tbody></table></div></div></main></div>
+<?php include __DIR__.'/../../layouts/footer.php'; ?>
