@@ -8,7 +8,7 @@
     padding: 1.3rem 1.5rem;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-left: 5px solid #f5c842;
+    border-left: 5px solid #b8860b;
     border-radius: 14px;
     box-shadow: 0 5px 20px rgba(15, 33, 55, .06);
 }
@@ -56,7 +56,7 @@
     padding: 1rem 1.08rem;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
     border-radius: 13px;
     box-shadow: 0 5px 18px rgba(15, 33, 55, .06);
 }
@@ -126,7 +126,7 @@
     padding: .9rem 1.15rem;
     color: #fff;
     background: linear-gradient(135deg, #0a1628, #1a3a5c);
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .sync-panel-heading h2 {
@@ -137,7 +137,7 @@
 
 .sync-panel-heading h2 i {
     margin-right: .4rem;
-    color: #f5c842;
+    color: #b8860b;
 }
 
 .sync-panel-heading p {
@@ -525,7 +525,7 @@
 }
 
 #synchronizationModal .modal-header {
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .sync-form-steps {
@@ -564,11 +564,11 @@
 .sync-step.active {
     color: #0a1628;
     background: #fffbea;
-    border-color: #f5c842;
+    border-color: #b8860b;
 }
 
 .sync-step.active span {
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .sync-form-section {
@@ -706,8 +706,8 @@
 
 .sync-criterion-rating input:checked + span {
     color: #0a1628;
-    background: #f5c842;
-    border-color: #f5c842;
+    background: #b8860b;
+    border-color: #b8860b;
 }
 
 .sync-score-panel {
@@ -718,7 +718,7 @@
     padding: 1.2rem;
     color: #fff;
     background: linear-gradient(145deg, #0a1628, #1a3a5c);
-    border-bottom: 4px solid #f5c842;
+    border-bottom: 4px solid #b8860b;
     border-radius: 12px;
     text-align: center;
 }
@@ -733,7 +733,7 @@
 
 .sync-score-panel > strong {
     margin-top: .7rem;
-    color: #f5c842;
+    color: #b8860b;
     font-size: 3rem;
     line-height: 1;
 }
@@ -755,14 +755,14 @@
 
 .sync-score-meter div {
     height: 100%;
-    background: linear-gradient(90deg, #f5c842, #10b981);
+    background: linear-gradient(90deg, #b8860b, #10b981);
     border-radius: inherit;
 }
 
 .sync-score-result {
     padding: .45rem .65rem;
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
     border-radius: 999px;
     font-size: .65rem;
     font-weight: 800;
@@ -799,7 +799,7 @@
     width: 34px;
     height: 34px;
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
     border-radius: 9px;
     font-size: .7rem;
     font-weight: 800;
@@ -1001,7 +1001,7 @@
 
 .sync-history-item.current > span {
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .sync-history-item > div {

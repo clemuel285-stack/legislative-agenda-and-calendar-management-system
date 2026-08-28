@@ -9,7 +9,7 @@
     --lacms-blue-700: #1a3a5c;
     --lacms-blue-600: #255984;
     --lacms-blue-500: #3b78aa;
-    --lacms-gold: #f5c842;
+    --lacms-gold: #b8860b;
     --lacms-gold-dark: #b8860b;
     --lacms-surface: #ffffff;
     --lacms-background: #eef3f8;
@@ -733,4 +733,55 @@ textarea {
         width: 37px;
         height: 37px;
     }
+}
+
+/* Sidebar Collapsed Icon-Only Mode */
+body.sidebar-collapsed {
+    --lacms-sidebar-width: 74px !important;
+    --side: 74px !important;
+}
+
+body.sidebar-collapsed .sidebar,
+body.sidebar-collapsed .lacms-sidebar,
+body.sidebar-collapsed .orlms-sidebar {
+    width: 74px !important;
+}
+
+body.sidebar-collapsed .topbar,
+body.sidebar-collapsed .lacms-topbar,
+body.sidebar-collapsed .orlms-topbar {
+    left: 74px !important;
+}
+
+body.sidebar-collapsed .main-content,
+body.sidebar-collapsed .lacms-main-content,
+body.sidebar-collapsed .orlms-main-content {
+    margin-left: 74px !important;
+}
+
+body.sidebar-collapsed .sidebar-brand-copy,
+body.sidebar-collapsed .sidebar-group-label,
+body.sidebar-collapsed .sidebar-section-label,
+body.sidebar-collapsed .sidebar-system-status > div,
+body.sidebar-collapsed .sidebar-link-label,
+body.sidebar-collapsed .sidebar-link > span,
+body.sidebar-collapsed .sidebar-link > em,
+body.sidebar-collapsed .sidebar-footer > div {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar-brand {
+    justify-content: center !important;
+    padding: .8rem .4rem !important;
+}
+
+body.sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    padding: .75rem 0 !important;
+}
+
+body.sidebar-collapsed .sidebar-link-icon,
+body.sidebar-collapsed .sidebar-link > i {
+    font-size: 1.35rem !important;
+    margin: 0 !important;
 }

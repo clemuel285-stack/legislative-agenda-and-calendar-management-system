@@ -6,7 +6,7 @@ require_once __DIR__.'/includes/lacms_report_helpers.php';
 requireLacmsPermission('lacms.dashboard.view');
 
 $pdo=db();$pageTitle='Dashboard';$activeMenu='dashboard';
-$extraCss=[appUrl('assets/css/lacms-dashboard-v2.css'),appUrl('assets/css/lacms-operational.css')];
+$extraCss=[appUrl('assets/css/lacms-dashboard-v2.css?v='.time()),appUrl('assets/css/lacms-operational.css?v='.time())];
 
 $stats=lacmsDashboardStats($pdo);
 
@@ -52,8 +52,8 @@ include __DIR__.'/layouts/header.php';
 ?>
 <div class="lacms-app-wrapper"><?php include __DIR__.'/layouts/sidebar.php'; ?><main class="lacms-main-content">
 
-<section class="lacms-dashboard-hero">
-<div><div class="lacms-dashboard-eyebrow"><i class="bi bi-building"></i> Local Government Unit of Manila</div><h1>Legislative Agenda and Calendar Management System</h1><p>Operational monitoring for agendas, calendar schedules, meetings, deadlines, reminders, notifications and legislative coordination.</p><div class="lacms-dashboard-hero-actions"><a href="<?= e(appUrl('modules/agendas/index.php')) ?>" class="btn btn-warning"><i class="bi bi-list-check"></i> Agendas</a><a href="<?= e(appUrl('modules/calendar/index.php')) ?>" class="btn btn-outline-light"><i class="bi bi-calendar3"></i> Master Calendar</a><a href="<?= e(appUrl('reports/index.php')) ?>" class="btn btn-outline-light"><i class="bi bi-bar-chart"></i> Reports</a></div></div>
+<section class="lacms-dashboard-hero" style="background: transparent !important; background-color: transparent !important; border: none !important; box-shadow: none !important; padding: 0.5rem 0 1.5rem !important;">
+<div><div class="lacms-dashboard-eyebrow"><i class="bi bi-building"></i> Local Government Unit of Manila</div><h1>Legislative Agenda and Calendar Management System</h1><p>Operational monitoring for agendas, calendar schedules, meetings, deadlines, reminders, notifications and legislative coordination.</p><div class="lacms-dashboard-hero-actions"><a href="<?= e(appUrl('modules/agendas/index.php')) ?>" class="btn btn-warning"><i class="bi bi-list-check"></i> Agendas</a><a href="<?= e(appUrl('modules/calendar/index.php')) ?>" class="btn btn-outline-secondary"><i class="bi bi-calendar3"></i> Master Calendar</a><a href="<?= e(appUrl('reports/index.php')) ?>" class="btn btn-outline-secondary"><i class="bi bi-bar-chart"></i> Reports</a></div></div>
 <div class="lacms-intelligence-overview"><span><i class="bi bi-stars"></i></span><div><small>Coordination Intelligence</small><strong><?= $stats['overdue'] ?> overdue · <?= $stats['conflicts'] ?> conflict(s)</strong><p><?= $stats['notifications'] ?> reminder/notification record(s) require delivery/follow-up; <?= $stats['sync_attention'] ?> synchronization record(s) need attention.</p></div></div>
 </section>
 
@@ -87,13 +87,81 @@ include __DIR__.'/layouts/header.php';
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  const activity=<?= json_encode($activity,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
- new Chart(document.getElementById('activityChart'),{type:'bar',data:{labels:activity.map(x=>x.label),datasets:[
-  {label:'Calendar Events',data:activity.map(x=>Number(x.events))},
-  {label:'Meetings',data:activity.map(x=>Number(x.meetings))},
-  {label:'Deadlines',data:activity.map(x=>Number(x.deadlines))}
- ]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+ new Chart(document.getElementById('activityChart'),{
+  type:'bar',
+  data:{
+   labels:activity.map(x=>x.label),
+   datasets:[
+    {
+     label:'Calendar Events',
+     data:activity.map(x=>Number(x.events)),
+     backgroundColor:'#0f2137',
+     borderColor:'#071426',
+     borderWidth:1,
+     borderRadius:4
+    },
+    {
+     label:'Meetings',
+     data:activity.map(x=>Number(x.meetings)),
+     backgroundColor:'#b8860b',
+     borderColor:'#946c07',
+     borderWidth:1,
+     borderRadius:4
+    },
+    {
+     label:'Deadlines',
+     data:activity.map(x=>Number(x.deadlines)),
+     backgroundColor:'#2563eb',
+     borderColor:'#1d4ed8',
+     borderWidth:1,
+     borderRadius:4
+    }
+   ]
+  },
+  options:{
+   responsive:true,
+   scales:{
+    y:{
+     beginAtZero:true,
+     ticks:{precision:0}
+    }
+   }
+  }
+ });
+
  const dd=<?= json_encode($deadlineDist,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
- new Chart(document.getElementById('deadlineChart'),{type:'doughnut',data:{labels:dd.map(x=>x.label),datasets:[{data:dd.map(x=>Number(x.total))}]},options:{responsive:true}});
+ const goldBluePalette=[
+  '#0f2137',
+  '#b8860b',
+  '#2563eb',
+  '#d97706',
+  '#3b82f6',
+  '#eab308',
+  '#1d4ed8',
+  '#f59e0b'
+ ];
+ const bgColors=dd.map((x,i)=>goldBluePalette[i%goldBluePalette.length]);
+
+ new Chart(document.getElementById('deadlineChart'),{
+  type:'doughnut',
+  data:{
+   labels:dd.map(x=>x.label),
+   datasets:[{
+    data:dd.map(x=>Number(x.total)),
+    backgroundColor:bgColors,
+    borderColor:'#ffffff',
+    borderWidth:2
+   }]
+  },
+  options:{
+   responsive:true,
+   plugins:{
+    legend:{
+     position:'bottom'
+    }
+   }
+  }
+ });
 });
 </script>
 <?php include __DIR__.'/layouts/footer.php'; ?>

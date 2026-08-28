@@ -13,7 +13,7 @@
     padding: 1.3rem 1.5rem;
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-left: 5px solid #f5c842;
+    border-left: 5px solid #b8860b;
     border-radius: 14px;
     box-shadow: 0 5px 20px rgba(15, 33, 55, 0.06);
 }
@@ -62,7 +62,7 @@
     overflow: hidden;
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
     border-radius: 13px;
     box-shadow: 0 5px 18px rgba(15, 33, 55, 0.06);
 }
@@ -156,7 +156,7 @@
     padding: 0.9rem 1.15rem;
     color: #ffffff;
     background: linear-gradient(135deg, #0a1628, #1a3a5c);
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .priority-table-header h2,
@@ -169,7 +169,7 @@
 .priority-table-header h2 i,
 .priority-panel-heading h2 i {
     margin-right: 0.4rem;
-    color: #f5c842;
+    color: #b8860b;
 }
 
 .priority-table-header p {
@@ -238,7 +238,7 @@
     height: 31px;
     color: #0a1628;
     background: #fff7d6;
-    border: 1px solid #f5c842;
+    border: 1px solid #b8860b;
     border-radius: 50%;
     font-size: 0.68rem;
     font-weight: 800;
@@ -415,7 +415,7 @@
 }
 
 #priorityModal .modal-header {
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .priority-form-steps {
@@ -455,12 +455,12 @@
 .priority-step.active {
     color: #0a1628;
     background: #fffbea;
-    border-color: #f5c842;
+    border-color: #b8860b;
 }
 
 .priority-step.active span {
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .priority-form-section {
@@ -599,8 +599,8 @@
 
 .criterion-rating input:checked + span {
     color: #0a1628;
-    background: #f5c842;
-    border-color: #f5c842;
+    background: #b8860b;
+    border-color: #b8860b;
 }
 
 .priority-score-panel {
@@ -611,7 +611,7 @@
     padding: 1.2rem;
     color: #ffffff;
     background: linear-gradient(145deg, #0a1628, #1a3a5c);
-    border-bottom: 4px solid #f5c842;
+    border-bottom: 4px solid #b8860b;
     border-radius: 12px;
     text-align: center;
 }
@@ -626,7 +626,7 @@
 
 .priority-score-panel > strong {
     margin-top: 0.7rem;
-    color: #f5c842;
+    color: #b8860b;
     font-size: 3rem;
     line-height: 1;
 }
@@ -648,14 +648,14 @@
 
 .priority-score-meter div {
     height: 100%;
-    background: linear-gradient(90deg, #f5c842, #10b981);
+    background: linear-gradient(90deg, #b8860b, #10b981);
     border-radius: inherit;
 }
 
 .priority-score-recommendation {
     padding: 0.45rem 0.65rem;
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
     border-radius: 999px;
     font-size: 0.65rem;
     font-weight: 800;
@@ -917,7 +917,7 @@
 
 .priority-history-item.current > span {
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .priority-history-item > div {

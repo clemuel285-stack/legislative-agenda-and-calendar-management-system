@@ -8,7 +8,7 @@
     padding: 1.3rem 1.5rem;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-left: 5px solid #f5c842;
+    border-left: 5px solid #b8860b;
     border-radius: 14px;
     box-shadow: 0 5px 20px rgba(15, 33, 55, .06);
 }
@@ -58,7 +58,7 @@
     padding: 1rem 1.08rem;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
     border-radius: 13px;
     box-shadow: 0 5px 18px rgba(15, 33, 55, .06);
 }
@@ -128,7 +128,7 @@
     padding: .9rem 1.15rem;
     color: #fff;
     background: linear-gradient(135deg, #0a1628, #1a3a5c);
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .calendar-panel-heading h2 {
@@ -139,7 +139,7 @@
 
 .calendar-panel-heading h2 i {
     margin-right: .4rem;
-    color: #f5c842;
+    color: #b8860b;
 }
 
 .calendar-panel-heading p {
@@ -169,8 +169,8 @@
 .calendar-navigation button:hover,
 .calendar-view-switcher button.active {
     color: #0a1628;
-    background: #f5c842;
-    border-color: #f5c842;
+    background: #b8860b;
+    border-color: #b8860b;
 }
 
 .calendar-view-section {
@@ -234,7 +234,7 @@
     width: 25px;
     height: 25px;
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
     border-radius: 50%;
 }
 
@@ -339,7 +339,7 @@
     height: 45px;
     flex: 0 0 45px;
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
     border-radius: 10px;
 }
 
@@ -518,7 +518,7 @@
 }
 
 #calendarEventModal .modal-header {
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .calendar-form-steps {
@@ -556,12 +556,12 @@
 .calendar-step.active {
     color: #0a1628;
     background: #fffbea;
-    border-color: #f5c842;
+    border-color: #b8860b;
 }
 
 .calendar-step.active span {
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .calendar-form-section {
@@ -662,7 +662,7 @@
     width: 34px;
     height: 34px;
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
     border-radius: 9px;
     font-size: .7rem;
     font-weight: 800;
@@ -842,7 +842,7 @@
 
 .calendar-history-item.current > span {
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .calendar-history-item > div {

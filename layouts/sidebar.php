@@ -23,55 +23,51 @@ $adminItems = [
     ['key'=>'system_health','label'=>'System Health','icon'=>'bi-heart-pulse','url'=>appUrl('pages/system_health.php'),'permission'=>'lacms.system_health.view'],
 ];
 ?>
-<aside class="lacms-sidebar" id="lacmsSidebar">
-    <div class="lacms-sidebar-brand">
-        <span><i class="bi bi-calendar3"></i></span>
-        <div><strong>LACMS</strong><small>Agenda & Calendar</small></div>
+<aside class="orlms-sidebar lacms-sidebar sidebar" id="orlmsSidebar">
+    <div class="orlms-sidebar-brand lacms-sidebar-brand sidebar-brand">
+        <img src="<?= e(appUrl('assets/images/manila.png?v=' . time())) ?>" alt="City of Manila Seal" class="orlms-sidebar-logo lacms-sidebar-logo sidebar-logo" style="width:60px !important;height:60px !important;max-width:60px !important;max-height:60px !important;object-fit:contain;">
+        <div><strong>LACMS</strong><small>Agenda & Calendar Management System</small></div>
     </div>
 
-    <div class="lacms-office-card">
-        <i class="bi bi-building"></i>
-        <div><strong>LGU of Manila</strong><small>Centralized Legislative Coordination</small></div>
-    </div>
-
-    <nav class="lacms-sidebar-nav">
-        <div class="lacms-sidebar-section">Overview</div>
-        <?php if(lacmsHasPermission('lacms.dashboard.view')): ?><a href="<?= e(appUrl('dashboard.php')) ?>" class="lacms-sidebar-link <?= $activeMenu==='dashboard'?'active':'' ?>">
+    <nav class="orlms-sidebar-nav lacms-sidebar-nav sidebar-navigation">
+        <div class="orlms-sidebar-section lacms-sidebar-section sidebar-section-label">Overview</div>
+        <?php if(lacmsHasPermission('lacms.dashboard.view')): ?><a href="<?= e(appUrl('dashboard.php')) ?>" class="orlms-sidebar-link lacms-sidebar-link sidebar-link <?= $activeMenu==='dashboard'?'active':'' ?>" title="Dashboard">
             <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+            <?php if ($activeMenu==='dashboard'): ?><b></b><?php endif; ?>
         </a><?php endif; ?>
 
-        <div class="lacms-sidebar-section">Agenda & Calendar Management</div>
+        <div class="orlms-sidebar-section lacms-sidebar-section sidebar-section-label">Agenda & Calendar Management</div>
         <?php foreach ($moduleItems as $item): ?>
             <?php if (!lacmsHasPermission($item['permission'])) continue; ?>
-            <a href="<?= e($item['url']) ?>" class="lacms-sidebar-link <?= $activeMenu===$item['key']?'active':'' ?>">
+            <a href="<?= e($item['url']) ?>" class="orlms-sidebar-link lacms-sidebar-link sidebar-link <?= $activeMenu===$item['key']?'active':'' ?>" title="<?= e($item['label']) ?>">
                 <i class="bi <?= e($item['icon']) ?>"></i><span><?= e($item['label']) ?></span>
                 <?php if ($activeMenu===$item['key']): ?><b></b><?php endif; ?>
             </a>
         <?php endforeach; ?>
 
-        <div class="lacms-sidebar-section">Automation & Communication</div>
+        <div class="orlms-sidebar-section lacms-sidebar-section sidebar-section-label">Automation & Communication</div>
         <?php foreach ($automationItems as $item): ?>
             <?php if (!lacmsHasPermission($item['permission'])) continue; ?>
-            <a href="<?= e($item['url']) ?>" class="lacms-sidebar-link <?= $activeMenu===$item['key']?'active':'' ?>">
+            <a href="<?= e($item['url']) ?>" class="orlms-sidebar-link lacms-sidebar-link sidebar-link <?= $activeMenu===$item['key']?'active':'' ?>" title="<?= e($item['label']) ?>">
                 <i class="bi <?= e($item['icon']) ?>"></i><span><?= e($item['label']) ?></span>
                 <?php if ($item['badge']!==''): ?><em><?= e($item['badge']) ?></em><?php endif; ?>
                 <?php if ($activeMenu===$item['key']): ?><b></b><?php endif; ?>
             </a>
         <?php endforeach; ?>
 
-        <div class="lacms-sidebar-section">Administration</div>
+        <div class="orlms-sidebar-section lacms-sidebar-section sidebar-section-label">Administration</div>
         <?php foreach ($adminItems as $item): ?>
             <?php if (!lacmsHasPermission($item['permission'])) continue; ?>
-            <a href="<?= e($item['url']) ?>" class="lacms-sidebar-link <?= $activeMenu===$item['key']?'active':'' ?>">
+            <a href="<?= e($item['url']) ?>" class="orlms-sidebar-link lacms-sidebar-link sidebar-link <?= $activeMenu===$item['key']?'active':'' ?>" title="<?= e($item['label']) ?>">
                 <i class="bi <?= e($item['icon']) ?>"></i><span><?= e($item['label']) ?></span>
                 <?php if ($activeMenu===$item['key']): ?><b></b><?php endif; ?>
             </a>
         <?php endforeach; ?>
     </nav>
 
-    <div class="lacms-sidebar-footer">
+    <div class="orlms-sidebar-footer lacms-sidebar-footer sidebar-session-card">
         <i class="bi bi-shield-check"></i>
         <div><strong>Secure Shared Access</strong><small>Role-based authenticated session</small></div>
     </div>
 </aside>
-<div class="lacms-sidebar-backdrop" id="lacmsSidebarBackdrop"></div>
+<div class="orlms-sidebar-backdrop lacms-sidebar-backdrop sidebar-backdrop" id="orlmsSidebarBackdrop"></div>

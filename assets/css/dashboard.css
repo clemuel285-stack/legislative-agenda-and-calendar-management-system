@@ -9,17 +9,11 @@
     gap: 1.25rem;
     margin-bottom: 1.25rem;
     padding: 1.25rem 1.4rem;
-    color: #fff;
-    background:
-        radial-gradient(
-            circle at 90% 15%,
-            rgba(245, 200, 66, .18),
-            transparent 25%
-        ),
-        linear-gradient(135deg, #0a1628, #1a3a5c);
-    border-bottom: 4px solid #f5c842;
+    color: #071426;
+    background: transparent;
+    border-bottom: 4px solid #b8860b;
     border-radius: 15px;
-    box-shadow: 0 8px 28px rgba(15, 33, 55, .12);
+    box-shadow: none;
 }
 
 .dashboard-eyebrow {
@@ -27,7 +21,7 @@
     align-items: center;
     gap: .35rem;
     margin-bottom: .3rem;
-    color: #f5c842;
+    color: #b8860b;
     font-size: .62rem;
     font-weight: 800;
     letter-spacing: .08em;
@@ -43,7 +37,7 @@
 .dashboard-page-header p {
     max-width: 680px;
     margin: .4rem 0 0;
-    color: rgba(255, 255, 255, .68);
+    color: #64748b;
     font-size: .75rem;
 }
 
@@ -53,14 +47,14 @@
     gap: .55rem;
     min-width: 190px;
     padding: .7rem .8rem;
-    color: rgba(255, 255, 255, .85);
-    background: rgba(255, 255, 255, .08);
-    border: 1px solid rgba(255, 255, 255, .1);
+    color: #071426;
+    background: transparent;
+    border: 1px solid #dce5ee;
     border-radius: 11px;
 }
 
 .dashboard-date i {
-    color: #f5c842;
+    color: #b8860b;
     font-size: 1.2rem;
 }
 
@@ -75,7 +69,7 @@
 
 .dashboard-date span {
     margin-top: .12rem;
-    color: rgba(255, 255, 255, .55);
+    color: #64748b;
     font-size: .58rem;
 }
 
@@ -86,11 +80,11 @@
     min-height: 122px;
     padding: 1rem 1.05rem;
     overflow: hidden;
-    background: #fff;
+    background: transparent;
     border: 1px solid #dce5ee;
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
     border-radius: 13px;
-    box-shadow: 0 5px 18px rgba(15, 33, 55, .06);
+    box-shadow: none;
 }
 
 .dashboard-summary-icon {
@@ -102,8 +96,8 @@
     justify-content: center;
     width: 38px;
     height: 38px;
-    color: #1a3a5c;
-    background: #eaf3fb;
+    color: #b8860b;
+    background: #fdf8ea;
     border-radius: 10px;
 }
 
@@ -124,10 +118,10 @@
 
 .dashboard-panel {
     overflow: hidden;
-    background: #fff;
+    background: transparent;
     border: 1px solid #dce5ee;
     border-radius: 14px;
-    box-shadow: 0 5px 20px rgba(15, 33, 55, .06);
+    box-shadow: none;
 }
 
 .dashboard-panel-heading {
@@ -136,9 +130,9 @@
     justify-content: space-between;
     gap: 1rem;
     padding: .9rem 1.1rem;
-    color: #fff;
-    background: linear-gradient(135deg, #0a1628, #1a3a5c);
-    border-bottom: 3px solid #f5c842;
+    color: #071426;
+    background: transparent;
+    border-bottom: 3px solid #b8860b;
 }
 
 .dashboard-panel-heading h2 {
@@ -149,12 +143,12 @@
 
 .dashboard-panel-heading h2 i {
     margin-right: .4rem;
-    color: #f5c842;
+    color: #b8860b;
 }
 
 .dashboard-panel-heading p {
     margin: .2rem 0 0;
-    color: rgba(255, 255, 255, .55);
+    color: #64748b;
     font-size: .61rem;
 }
 
@@ -172,22 +166,22 @@
     min-height: 92px;
     padding: .8rem;
     color: #475569;
-    background: #f8fafc;
+    background: transparent;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     text-decoration: none;
 }
 
 .dashboard-module-card:hover {
-    color: #fff;
-    background: #1a3a5c;
-    border-color: #1a3a5c;
+    color: #0a1628;
+    background: #fdf8ea;
+    border-color: #b8860b;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(26, 58, 92, .18);
+    box-shadow: 0 8px 20px rgba(184, 134, 11, .12);
 }
 
 .dashboard-module-card:hover small {
-    color: rgba(255, 255, 255, .6);
+    color: #64748b;
 }
 
 .dashboard-module-icon {
@@ -197,15 +191,15 @@
     width: 42px;
     height: 42px;
     flex: 0 0 42px;
-    color: #1a3a5c;
-    background: #eaf3fb;
+    color: #b8860b;
+    background: #fdf8ea;
     border-radius: 11px;
     font-size: 1.1rem;
 }
 
 .dashboard-module-card:hover .dashboard-module-icon {
-    color: #0a1628;
-    background: #f5c842;
+    color: #fff;
+    background: #b8860b;
 }
 
 .dashboard-module-card > div {

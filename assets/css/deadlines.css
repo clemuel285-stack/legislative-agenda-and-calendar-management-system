@@ -8,7 +8,7 @@
     padding: 1.3rem 1.5rem;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-left: 5px solid #f5c842;
+    border-left: 5px solid #b8860b;
     border-radius: 14px;
     box-shadow: 0 5px 20px rgba(15, 33, 55, .06);
 }
@@ -56,7 +56,7 @@
     padding: 1rem 1.08rem;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
     border-radius: 13px;
     box-shadow: 0 5px 18px rgba(15, 33, 55, .06);
 }
@@ -128,7 +128,7 @@
     padding: .9rem 1.15rem;
     color: #fff;
     background: linear-gradient(135deg, #0a1628, #1a3a5c);
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .deadline-panel-heading h2 {
@@ -139,7 +139,7 @@
 
 .deadline-panel-heading h2 i {
     margin-right: .4rem;
-    color: #f5c842;
+    color: #b8860b;
 }
 
 .deadline-panel-heading p {
@@ -494,7 +494,7 @@
 }
 
 #deadlineModal .modal-header {
-    border-bottom: 3px solid #f5c842;
+    border-bottom: 3px solid #b8860b;
 }
 
 .deadline-form-steps {
@@ -533,11 +533,11 @@
 .deadline-step.active {
     color: #0a1628;
     background: #fffbea;
-    border-color: #f5c842;
+    border-color: #b8860b;
 }
 
 .deadline-step.active span {
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .deadline-form-section {
@@ -624,7 +624,7 @@
     width: 34px;
     height: 34px;
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
     border-radius: 9px;
     font-size: .7rem;
     font-weight: 800;
@@ -839,7 +839,7 @@
 
 .deadline-history-item.current > span {
     color: #0a1628;
-    background: #f5c842;
+    background: #b8860b;
 }
 
 .deadline-history-item > div {

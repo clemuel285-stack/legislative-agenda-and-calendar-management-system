@@ -32,44 +32,32 @@ $subsystems = [
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($pageTitle) ?> | LACMS</title>
+<link rel="icon" type="image/png" href="<?= e(appUrl('assets/images/manila.png?v=' . time())) ?>">
+<link rel="shortcut icon" href="<?= e(appUrl('favicon.ico?v=' . time())) ?>">
+<link rel="apple-touch-icon" href="<?= e(appUrl('assets/images/manila.png?v=' . time())) ?>">
 <link rel="stylesheet" href="<?= e(vendorAsset('bootstrap/bootstrap.min.css','https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')) ?>">
 <link rel="stylesheet" href="<?= e(vendorAsset('bootstrap-icons/bootstrap-icons.css','https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')) ?>">
-<link rel="stylesheet" href="<?= e(appUrl('assets/css/lacms-shell.css')) ?>">
+<link rel="stylesheet" href="<?= e(appUrl('assets/css/lacms-shell.css?v=' . time())) ?>">
+<link rel="stylesheet" href="<?= e(appUrl('assets/css/orlms-shell.css?v=' . time())) ?>">
 <?php foreach ($extraCss as $css): ?>
-<link rel="stylesheet" href="<?= e($css) ?>">
+<link rel="stylesheet" href="<?= e(str_contains($css, '?') ? $css : $css . '?v=' . time()) ?>">
 <?php endforeach; ?>
 </head>
 <body>
-<header class="lacms-topbar">
-    <button type="button" class="lacms-menu-button" id="lacmsSidebarToggle" aria-label="Toggle navigation">
+<header class="lacms-topbar orlms-topbar">
+    <button type="button" class="lacms-menu-button orlms-menu-button" id="lacmsSidebarToggle" aria-label="Toggle navigation">
         <i class="bi bi-list"></i>
     </button>
 
-    <a href="<?= e(appUrl('dashboard.php')) ?>" class="lacms-topbar-brand">
-        <span><i class="bi bi-calendar3"></i></span>
-        <div>
-            <strong>LACMS</strong>
-            <small>Local Government Unit of Manila · Legislative Coordination</small>
-        </div>
-    </a>
-
-    <div class="lacms-topbar-actions">
-        <a href="<?= e(appUrl('pages/search.php')) ?>" class="lacms-topbar-icon" title="Global Search">
-            <i class="bi bi-search"></i>
-        </a>
-
-        <a href="<?= e(appUrl('pages/ai_email_reminders.php')) ?>" class="lacms-topbar-icon" title="AI-Assisted Email Reminders">
-            <i class="bi bi-stars"></i>
-        </a>
-
+    <div class="lacms-topbar-actions orlms-topbar-actions">
         <div class="dropdown">
-            <button type="button" class="lacms-system-switcher dropdown-toggle" data-bs-toggle="dropdown">
+            <button type="button" class="lacms-system-switcher orlms-system-switcher dropdown-toggle" data-bs-toggle="dropdown">
                 <i class="bi bi-grid-3x3-gap"></i><span>Subsystems</span>
             </button>
-            <div class="dropdown-menu dropdown-menu-end lacms-subsystem-menu">
-                <div class="lacms-subsystem-heading">Legislative Services Management System</div>
+            <div class="dropdown-menu dropdown-menu-end lacms-subsystem-menu orlms-subsystem-menu">
+                <div class="lacms-subsystem-heading orlms-subsystem-heading">Legislative Services Management System</div>
                 <?php foreach ($subsystems as $system): ?>
-                    <a href="<?= e($system['url']) ?>" class="lacms-subsystem-item <?= $system['active'] ? 'active' : '' ?>">
+                    <a href="<?= e($system['url']) ?>" class="lacms-subsystem-item orlms-subsystem-item <?= $system['active'] ? 'active' : '' ?>">
                         <span><i class="bi <?= e($system['icon']) ?>"></i></span>
                         <div><strong><?= e($system['short']) ?></strong><small><?= e($system['name']) ?></small></div>
                         <?php if ($system['active']): ?><i class="bi bi-check-circle-fill"></i><?php endif; ?>
@@ -79,9 +67,9 @@ $subsystems = [
         </div>
 
         <div class="dropdown">
-            <button type="button" class="lacms-user-button dropdown-toggle" data-bs-toggle="dropdown">
-                <span class="lacms-avatar"><?= e(strtoupper(substr($fullName,0,1))) ?></span>
-                <span class="lacms-user-copy"><strong><?= e($fullName) ?></strong><small><?= e($roleLabel) ?></small></span>
+            <button type="button" class="lacms-user-button orlms-user-button dropdown-toggle" data-bs-toggle="dropdown">
+                <span class="lacms-avatar orlms-avatar"><?= e(strtoupper(substr($fullName,0,1))) ?></span>
+                <span class="lacms-user-copy orlms-user-copy"><strong><?= e($fullName) ?></strong><small><?= e($roleLabel) ?></small></span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <?php if ($email !== ''): ?>
