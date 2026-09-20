@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/app.php';
 
-if (!defined('DB_HOST')) define('DB_HOST', '127.0.0.1');
+if (!defined('DB_HOST')) define('DB_HOST', 'mariadb-rcbdyxxo.internal');
 if (!defined('DB_PORT')) define('DB_PORT', '3306');
-if (!defined('DB_NAME')) define('DB_NAME', 'legislative_management_db');
-if (!defined('DB_USER')) define('DB_USER', 'root');
-if (!defined('DB_PASS')) define('DB_PASS', '');
+if (!defined('DB_NAME')) define('DB_NAME', 'hf_db_rcbdyxxo');
+if (!defined('DB_USER')) define('DB_USER', 'hf_rltqcviass');
+if (!defined('DB_PASS')) define('DB_PASS', 'L1gr3vPUUKYvsk9tty2u4M6993psMHsK');
 
 function db(): PDO
 {
