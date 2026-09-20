@@ -1,7 +1,7 @@
 # LACMS - PHP 8 + Apache
 FROM php:8.2-apache
 
-# PDO MySQL is the only extra extension needed (curl, mbstring, etc. are already built in)
+# PDO MySQL is the only extra extension needed
 RUN docker-php-ext-install pdo_mysql
 
 # PHP settings: match the app's 10 MB upload limit and timezone
@@ -11,13 +11,12 @@ RUN { \
       echo 'date.timezone=Asia/Manila'; \
     } > /usr/local/etc/php/conf.d/lacms.ini
 
-# Behind Hostforge's reverse proxy the app must know the original request was HTTPS
+# Behind Hostforge's reverse proxy the app must know the request was HTTPS
 RUN printf 'ServerName localhost\nSetEnvIf X-Forwarded-Proto "https" HTTPS=on\n' \
       > /etc/apache2/conf-available/lacms-proxy.conf \
     && a2enconf lacms-proxy
 
-# Listen on the port the platform gives us via $PORT (Hostforge health-checks a
-# dynamic port such as 51541). If PORT is not provided, fall back to 80.
+# Listen on the port given by the platform ($PORT), default 80
 ENV PORT=80
 RUN sed -ri 's/^Listen 80$/Listen ${PORT}/' /etc/apache2/ports.conf \
     && sed -ri 's/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/' /etc/apache2/sites-available/000-default.conf \
