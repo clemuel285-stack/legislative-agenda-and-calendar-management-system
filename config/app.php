@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
-
+if (!defined('APP_URL') && getenv('APP_URL')) {
+    define('APP_URL', rtrim((string)getenv('APP_URL'), '/'));
+}
 if (!defined('APP_NAME')) {
     define('APP_NAME', 'Legislative Agenda and Calendar Management System');
 }
